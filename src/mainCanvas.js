@@ -123,8 +123,13 @@ const createScene = async () => {
   camera.applyGravity = true;
   camera.speed = 0.2;
 
+  camera.keysUp = [87, 38];
+  camera.keysDown = [83, 40];
+  camera.keysLeft = [65, 37];
+  camera.keysRight = [68, 39];
+
   //Set the ellipsoid around the camera (e.g. your player's size)
-  camera.ellipsoid = new BABYLON.Vector3(1, 1, 1);
+  camera.ellipsoid = new BABYLON.Vector3(0.5, 0.5, 0.5);
 
   // Ground plane
   const ground = BABYLON.Mesh.CreatePlane("ground", 40.0, scene);
