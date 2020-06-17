@@ -8,7 +8,7 @@ const initPointerLock = (canvas, camera) => {
   // On click event, request pointer lock
   canvas.addEventListener(
     "click",
-    (evt) => {
+    () => {
       canvas.requestPointerLock =
         canvas.requestPointerLock ||
         canvas.msRequestPointerLock ||
@@ -22,7 +22,7 @@ const initPointerLock = (canvas, camera) => {
   );
 
   // Event listener when the pointerlock is updated (or removed by pressing ESC for example).
-  const pointerlockchange = (event) => {
+  const pointerlockchange = () => {
     const controlEnabled =
       document.mozPointerLockElement === canvas ||
       document.webkitPointerLockElement === canvas ||
@@ -47,23 +47,25 @@ const initPointerLock = (canvas, camera) => {
   );
 };
 
-const createScene = function () {
-  const scene = new BABYLON.Scene(engine);
-
+const setupCamera = (scene) => {
   // This creates and positions a free camera (non-mesh)
   const camera = new BABYLON.UniversalCamera(
     "Camera",
-    new BABYLON.Vector3(0, 1, 0.5),
+    new BABYLON.Vector3(0, 1, 1.5),
     scene
   );
   initPointerLock(engine.getRenderingCanvas(), camera);
 
   // This targets the camera to scene origin
-  camera.setTarget(BABYLON.Vector3.Zero());
+  camera.setTarget(new BABYLON.Vector3(0, 1, 0));
 
   // This attaches the camera to the canvas
   camera.attachControl(canvas, true);
 
+  return camera;
+};
+
+const setupEnvironment = (scene) => {
   // Environment Texture
   const hdrTexture = new BABYLON.CubeTexture.CreateFromPrefilteredData(
     "img/nightEnvSpecularHDR.dds",
@@ -84,31 +86,9 @@ const createScene = function () {
   hdrSkyboxMaterial.disableLighting = true;
   hdrSkybox.material = hdrSkyboxMaterial;
   hdrSkybox.infiniteDistance = true;
+};
 
-  // const sphere = BABYLON.MeshBuilder.CreateSphere(
-  //   "sphere",
-  //   { diameter: 2 },
-  //   scene
-  // );
-  // const plastic = new BABYLON.PBRMaterial("plastic", scene);
-  // plastic.reflectionTexture = hdrTexture;
-  // plastic.microSurface = 0.96;
-  // plastic.albedoColor = new BABYLON.Color3(0.206, 0.94, 1);
-  // plastic.reflectivityColor = new BABYLON.Color3(0.003, 0.003, 0.003);
-  // sphere.material = plastic;
-
-  // BABYLON.SceneLoader.Append("./resources/", "gallery53.glb", scene);
-
-  BABYLON.SceneLoader.LoadAssetContainer(
-    "./resources/",
-    "gallery53.glb",
-    scene,
-    (container) => {
-      const meshes = container.meshes;
-      container.addAllToScene();
-    }
-  );
-
+const setupLights = (scene) => {
   const light1 = new BABYLON.HemisphericLight(
     "light1",
     new BABYLON.Vector3(1, 1, 0),
@@ -120,6 +100,27 @@ const createScene = function () {
     scene
   );
 
+  return [light1, light2];
+};
+
+const setupGltf = (scene) => {
+  BABYLON.SceneLoader.LoadAssetContainer(
+    "./resources/",
+    "gallery53.glb",
+    scene,
+    (container) => {
+      //const meshes = container.meshes;
+      container.addAllToScene();
+    }
+  );
+};
+
+const createScene = () => {
+  const scene = new BABYLON.Scene(engine);
+  const camera = setupCamera(scene);
+  setupEnvironment(scene);
+  setupGltf(scene);
+  const lights = setupLights();
   return scene;
 };
 
