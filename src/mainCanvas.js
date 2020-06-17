@@ -121,7 +121,7 @@ const createScene = async () => {
   const camera = setupCamera(scene);
   camera.checkCollisions = true;
   camera.applyGravity = true;
-  camera.speed = 0.2;
+  camera.speed = 0.1;
 
   camera.keysUp = [87, 38];
   camera.keysDown = [83, 40];
@@ -136,25 +136,27 @@ const createScene = async () => {
   ground.material = new BABYLON.StandardMaterial("groundMat", scene);
   ground.material.diffuseColor = new BABYLON.Color3(1, 1, 1);
   ground.material.backFaceCulling = false;
-  ground.position = new BABYLON.Vector3(5, -1, -15);
+  ground.position = new BABYLON.Vector3(5, 0, -15);
   ground.rotation = new BABYLON.Vector3(Math.PI / 2, 0, 0);
   ground.checkCollisions = true;
+  ground.visibility = 0;
 
-  //Simple crate
-  const box = BABYLON.Mesh.CreateBox("crate", 1, scene);
-  box.material = new BABYLON.StandardMaterial("Mat", scene);
-  box.material.diffuseColor = new BABYLON.Color3(0, 0, 1);
-  box.position = new BABYLON.Vector3(0, 0, -3);
-  box.checkCollisions = true;
-  box.applyGravity = true;
+  ////Simple crate
+  //const box = BABYLON.Mesh.CreateBox("crate", 1, scene);
+  //box.material = new BABYLON.StandardMaterial("Mat", scene);
+  //box.material.diffuseColor = new BABYLON.Color3(0, 0, 1);
+  //box.position = new BABYLON.Vector3(0, 0, -3);
+  //box.checkCollisions = true;
+  //box.applyGravity = true;
 
   setupEnvironment(scene);
 
   const gltf = await setupGltf(scene);
-  console.log("LOG gltf: ", gltf);
-  for (let mesh of gltf.meshes) {
-    mesh.checkCollisions = true;
-    mesh.applyGravity = true;
+
+  const collisionMesh = gltf.meshes.find((e) => e.name === "CollisionMesh");
+  if (collisionMesh) {
+    collisionMesh.checkCollisions = true;
+    collisionMesh.visibility = 0;
   }
 
   const lights = setupLights();
