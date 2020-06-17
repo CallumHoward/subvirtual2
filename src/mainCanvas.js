@@ -103,29 +103,64 @@ const setupLights = (scene) => {
   return [light1, light2];
 };
 
-const setupGltf = (scene) => {
-  BABYLON.SceneLoader.LoadAssetContainer(
+const setupGltf = async (scene) => {
+  const container = await BABYLON.SceneLoader.LoadAssetContainerAsync(
     "./resources/",
     "gallery53.glb",
-    scene,
-    (container) => {
-      //const meshes = container.meshes;
-      container.addAllToScene();
-    }
+    scene
   );
+  container.addAllToScene(scene);
+  return container;
 };
 
-const createScene = () => {
+const createScene = async () => {
   const scene = new BABYLON.Scene(engine);
+  scene.collisionsEnabled = true;
+  scene.gravity = new BABYLON.Vector3(0, -0.9, 0);
+
   const camera = setupCamera(scene);
+  camera.checkCollisions = true;
+  camera.applyGravity = true;
+  camera.speed = 0.2;
+
+  //Set the ellipsoid around the camera (e.g. your player's size)
+  camera.ellipsoid = new BABYLON.Vector3(1, 1, 1);
+
+  // Ground plane
+  const ground = BABYLON.Mesh.CreatePlane("ground", 40.0, scene);
+  ground.material = new BABYLON.StandardMaterial("groundMat", scene);
+  ground.material.diffuseColor = new BABYLON.Color3(1, 1, 1);
+  ground.material.backFaceCulling = false;
+  ground.position = new BABYLON.Vector3(5, -1, -15);
+  ground.rotation = new BABYLON.Vector3(Math.PI / 2, 0, 0);
+  ground.checkCollisions = true;
+
+  //Simple crate
+  const box = BABYLON.Mesh.CreateBox("crate", 1, scene);
+  box.material = new BABYLON.StandardMaterial("Mat", scene);
+  box.material.diffuseColor = new BABYLON.Color3(0, 0, 1);
+  box.position = new BABYLON.Vector3(0, 0, -3);
+  box.checkCollisions = true;
+  box.applyGravity = true;
+
   setupEnvironment(scene);
-  setupGltf(scene);
+
+  const gltf = await setupGltf(scene);
+  console.log("LOG gltf: ", gltf);
+  for (let mesh of gltf.meshes) {
+    mesh.checkCollisions = true;
+    mesh.applyGravity = true;
+  }
+
   const lights = setupLights();
+
+  scene.debugLayer.show();
+
   return scene;
 };
 
-const initBabylonCanvas = () => {
-  const scene = createScene();
+const initBabylonCanvas = async () => {
+  const scene = await createScene();
   engine.runRenderLoop(function () {
     scene.render();
   });

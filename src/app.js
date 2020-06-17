@@ -2,7 +2,7 @@ import { initBabylonCanvas } from "./mainCanvas";
 import "./app.scss";
 
 const initAll = async () => {
-  initBabylonCanvas();
+  await initBabylonCanvas();
 };
 
 initAll();
