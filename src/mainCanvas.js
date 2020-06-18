@@ -62,6 +62,20 @@ const setupCamera = (scene) => {
   // This attaches the camera to the canvas
   camera.attachControl(canvas, true);
 
+  // Physics model
+  camera.checkCollisions = true;
+  camera.applyGravity = true;
+  camera.speed = 0.025;
+
+  // Key controls for WASD and arrows
+  camera.keysUp = [87, 38];
+  camera.keysDown = [83, 40];
+  camera.keysLeft = [65, 37];
+  camera.keysRight = [68, 39];
+
+  // Set the ellipsoid around the camera (e.g. your player's size)
+  camera.ellipsoid = new BABYLON.Vector3(0.5, 0.2, 0.5);
+
   return camera;
 };
 
@@ -118,32 +132,17 @@ const createScene = async () => {
   scene.collisionsEnabled = true;
   scene.gravity = new BABYLON.Vector3(0, -0.9, 0);
 
-  const camera = setupCamera(scene);
-  camera.checkCollisions = true;
-  camera.applyGravity = true;
-  camera.speed = 0.05;
+  scene.debugLayer.show();
 
-  camera.keysUp = [87, 38];
-  camera.keysDown = [83, 40];
-  camera.keysLeft = [65, 37];
-  camera.keysRight = [68, 39];
-
-  // Set the ellipsoid around the camera (e.g. your player's size)
-  camera.ellipsoid = new BABYLON.Vector3(0.5, 0.2, 0.5);
-
+  setupCamera(scene);
+  setupLights();
   setupEnvironment(scene);
-
   const gltf = await setupGltf(scene);
-
   const collisionMesh = gltf.meshes.find((e) => e.name === "CollisionMesh");
   if (collisionMesh) {
     collisionMesh.checkCollisions = true;
     collisionMesh.visibility = 0;
   }
-
-  const lights = setupLights();
-
-  scene.debugLayer.show();
 
   return scene;
 };
