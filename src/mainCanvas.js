@@ -51,7 +51,7 @@ const setupCamera = (scene) => {
   // This creates and positions a free camera (non-mesh)
   const camera = new BABYLON.UniversalCamera(
     "Camera",
-    new BABYLON.Vector3(0, 1, 1.5),
+    new BABYLON.Vector3(0, 1.5, 2),
     scene
   );
   initPointerLock(engine.getRenderingCanvas(), camera);
@@ -106,7 +106,7 @@ const setupLights = (scene) => {
 const setupGltf = async (scene) => {
   const container = await BABYLON.SceneLoader.LoadAssetContainerAsync(
     "./resources/",
-    "gallery53.glb",
+    "gallery62.glb",
     scene
   );
   container.addAllToScene(scene);
@@ -121,33 +121,15 @@ const createScene = async () => {
   const camera = setupCamera(scene);
   camera.checkCollisions = true;
   camera.applyGravity = true;
-  camera.speed = 0.1;
+  camera.speed = 0.05;
 
   camera.keysUp = [87, 38];
   camera.keysDown = [83, 40];
   camera.keysLeft = [65, 37];
   camera.keysRight = [68, 39];
 
-  //Set the ellipsoid around the camera (e.g. your player's size)
-  camera.ellipsoid = new BABYLON.Vector3(0.5, 0.5, 0.5);
-
-  // Ground plane
-  const ground = BABYLON.Mesh.CreatePlane("ground", 40.0, scene);
-  ground.material = new BABYLON.StandardMaterial("groundMat", scene);
-  ground.material.diffuseColor = new BABYLON.Color3(1, 1, 1);
-  ground.material.backFaceCulling = false;
-  ground.position = new BABYLON.Vector3(5, 0, -15);
-  ground.rotation = new BABYLON.Vector3(Math.PI / 2, 0, 0);
-  ground.checkCollisions = true;
-  ground.visibility = 0;
-
-  ////Simple crate
-  //const box = BABYLON.Mesh.CreateBox("crate", 1, scene);
-  //box.material = new BABYLON.StandardMaterial("Mat", scene);
-  //box.material.diffuseColor = new BABYLON.Color3(0, 0, 1);
-  //box.position = new BABYLON.Vector3(0, 0, -3);
-  //box.checkCollisions = true;
-  //box.applyGravity = true;
+  // Set the ellipsoid around the camera (e.g. your player's size)
+  camera.ellipsoid = new BABYLON.Vector3(0.5, 0.2, 0.5);
 
   setupEnvironment(scene);
 
