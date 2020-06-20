@@ -134,7 +134,7 @@ const createScene = async () => {
 
   scene.debugLayer.show();
 
-  setupCamera(scene);
+  const camera = setupCamera(scene);
   setupLights();
   setupEnvironment(scene);
   const gltf = await setupGltf(scene);
@@ -143,6 +143,17 @@ const createScene = async () => {
     collisionMesh.checkCollisions = true;
     collisionMesh.visibility = 0;
   }
+
+  const pipeline = new BABYLON.StandardRenderingPipeline(
+    "Motion Blur",
+    scene,
+    1.0,
+    null,
+    [camera]
+  );
+  pipeline.MotionBlurEnabled = true;
+  pipeline.motionStrength = 3.2;
+  pipeline.motionBlurSamples = 32;
 
   return scene;
 };
