@@ -51,7 +51,7 @@ const setupCamera = (scene) => {
   // This creates and positions a free camera (non-mesh)
   const camera = new BABYLON.UniversalCamera(
     "Camera",
-    new BABYLON.Vector3(0, 1.5, 2),
+    new BABYLON.Vector3(0, 1.5, -3),
     scene
   );
   initPointerLock(engine.getRenderingCanvas(), camera);
@@ -82,7 +82,7 @@ const setupCamera = (scene) => {
 const setupEnvironment = (scene) => {
   // Environment Texture
   const hdrTexture = new BABYLON.CubeTexture.CreateFromPrefilteredData(
-    "img/nightEnvSpecularHDR.dds",
+    "img/gallery.env",
     scene
   );
   scene.imageProcessingConfiguration.exposure = 0.1;
@@ -120,9 +120,24 @@ const setupLights = (scene) => {
 const setupGltf = async (scene) => {
   const container = await BABYLON.SceneLoader.LoadAssetContainerAsync(
     "./resources/",
-    "gallery62.glb",
+    "gallery.glb",
     scene
   );
+
+  // set up mirror material for the floor material only
+  container.materials[8].reflectionTexture = new BABYLON.MirrorTexture(
+    "mirror",
+    { ratio: 0.5 },
+    scene,
+    true
+  );
+  container.materials[8].reflectionTexture.mirrorPlane = new BABYLON.Plane.FromPositionAndNormal(
+    new BABYLON.Vector3(0, 0, 0),
+    new BABYLON.Vector3(0, -1, 0)
+  );
+  container.materials[8].reflectionTexture.renderList = container.meshes;
+  container.materials[8].reflectionTexture.level = 1;
+
   container.addAllToScene(scene);
   return container;
 };
