@@ -127,6 +127,27 @@ const setupGltf = async (scene) => {
   return container;
 };
 
+const setupText = (scene) => {
+  const plane = new BABYLON.Mesh.CreatePlane("Text Plane", 2, scene);
+  plane.rotation.y = 3.14159;
+  plane.position.y += 1;
+
+  const textTexture = new BABYLON.DynamicTexture(
+    "Dynamic Texture",
+    { width: 512, height: 512 },
+    scene
+  );
+  const textContext = textTexture.getContext();
+
+  const textMaterial = new BABYLON.StandardMaterial("Mat", scene);
+  textMaterial.diffuseTexture = textTexture;
+  plane.material = textMaterial;
+
+  // Add text to dynamic texture
+  const font = "bold 44px helvetica";
+  textTexture.drawText("ORIGIN", 75, 135, font, "black", "white", true, true);
+};
+
 const createScene = async () => {
   const scene = new BABYLON.Scene(engine);
   scene.collisionsEnabled = true;
@@ -143,6 +164,8 @@ const createScene = async () => {
     collisionMesh.checkCollisions = true;
     collisionMesh.visibility = 0;
   }
+
+  setupText(scene);
 
   const pipeline = new BABYLON.StandardRenderingPipeline(
     "Motion Blur",
