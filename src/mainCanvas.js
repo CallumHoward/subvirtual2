@@ -65,7 +65,7 @@ const setupCamera = (scene) => {
   // Physics model
   camera.checkCollisions = true;
   camera.applyGravity = true;
-  camera.speed = 0.025;
+  camera.speed = 0.035;
 
   // Key controls for WASD and arrows
   camera.keysUp = [87, 38];
@@ -74,7 +74,7 @@ const setupCamera = (scene) => {
   camera.keysRight = [68, 39];
 
   // Set the ellipsoid around the camera (e.g. your player's size)
-  camera.ellipsoid = new BABYLON.Vector3(0.5, 0.2, 0.5);
+  camera.ellipsoid = new BABYLON.Vector3(0.6, 0.2, 0.9);
 
   return camera;
 };
@@ -152,7 +152,7 @@ const setupGltf = async (scene) => {
 
 const setupText = (scene) => {
   const plane = new BABYLON.Mesh.CreatePlane("Text Plane", 2, scene);
-  plane.rotation.y = 3.14159;
+  // plane.rotation.y = 3.14159;
   plane.position.y += 1;
 
   const textTexture = new BABYLON.DynamicTexture(
@@ -160,6 +160,7 @@ const setupText = (scene) => {
     { width: 512, height: 512 },
     scene
   );
+  textTexture.hasAlpha = true;
   const textContext = textTexture.getContext();
 
   const textMaterial = new BABYLON.StandardMaterial("Mat", scene);
@@ -168,7 +169,7 @@ const setupText = (scene) => {
 
   // Add text to dynamic texture
   const font = "bold 44px helvetica";
-  textTexture.drawText("ORIGIN", 75, 135, font, "black", "white", true, true);
+  textTexture.drawText("ORIGIN", 75, 135, font, "black", null, true, true);
 };
 
 const setupPipeline = (scene, camera) => {
@@ -184,6 +185,13 @@ const setupPipeline = (scene, camera) => {
   pipeline.imageProcessing.contrast = 1.6;
   pipeline.imageProcessing.exposure = 0.2;
 
+  const curve = new BABYLON.ColorCurves();
+  curve.globalHue = 0;
+  curve.globalDensity = 100;
+  curve.globalSaturation = 20;
+  pipeline.imageProcessing.colorCurvesEnabled = true;
+  pipeline.imageProcessing.colorCurves = curve;
+
   // Motion blur - causes jaggies
   // const motionblur = new BABYLON.MotionBlurPostProcess(
   //   "motionblur",
@@ -198,6 +206,56 @@ const setupPipeline = (scene, camera) => {
   // Glow
   const gl = new BABYLON.GlowLayer("glow", scene, { mainTextureSamples: 1 });
   gl.intensity = 0.2;
+
+  const densities = new Array(50).fill(0);
+
+  const setHue = (enabled, hue) => {
+    densities.shift();
+    densities.push(enabled ? 85 : 0);
+    pipeline.imageProcessing.colorCurves.globalDensity =
+      densities.reduce((a, b) => a + b) / densities.length;
+
+    pipeline.imageProcessing.colorCurves.globalHue = hue;
+  };
+
+  return { setHue };
+};
+
+const sketch1 = (scene, camera, s1Bounds, setHue) => {
+  const start = new BABYLON.Vector3(0, 0, 0);
+  let hue = 0;
+
+  const update = () => {
+    if (intersectWithPoint(s1Bounds, camera.position)) {
+      const distance = BABYLON.Vector3.Distance(start, camera.position);
+      hue = (distance * 50) % 360;
+      setHue(true, hue);
+    } else {
+      setHue(false, hue);
+    }
+  };
+
+  const getHue = () => {
+    return hue;
+  };
+
+  return { update, getHue };
+};
+
+const intersectWithPoint = (mesh, point) => {
+  const localPoint = BABYLON.Vector3.TransformCoordinates(
+    point,
+    mesh.getWorldMatrix().clone().invert()
+  );
+  var boundInfo = mesh.getBoundingInfo();
+  var max = boundInfo.maximum;
+  var min = boundInfo.minimum;
+  if (localPoint.x > min.x && localPoint.x < max.x) {
+    if (localPoint.z > min.z && localPoint.z < max.z) {
+      return true;
+    }
+  }
+  return false;
 };
 
 const createScene = async () => {
@@ -216,19 +274,29 @@ const createScene = async () => {
     collisionMesh.checkCollisions = true;
     collisionMesh.visibility = 0;
   }
+  const s1Bounds = gltf.meshes.find((e) => e.name === "S1Bounds");
+  if (s1Bounds) {
+    s1Bounds.visibility = 0;
+  }
 
   setupText(scene);
-  setupPipeline(scene, camera);
+  const pipeline = setupPipeline(scene, camera);
+
+  const s1 = sketch1(scene, camera, s1Bounds, pipeline.setHue);
+
+  scene.registerBeforeRender(() => {
+    s1.update();
+  });
 
   return scene;
 };
 
 const initBabylonCanvas = async () => {
   const scene = await createScene();
-  engine.runRenderLoop(function () {
+  engine.runRenderLoop(() => {
     scene.render();
   });
-  window.addEventListener("resize", function () {
+  window.addEventListener("resize", () => {
     engine.resize();
   });
 };
