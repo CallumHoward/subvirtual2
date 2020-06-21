@@ -221,14 +221,30 @@ const setupPipeline = (scene, camera) => {
   return { setHue };
 };
 
+const rangeMap = (value, start1, stop1, start2, stop2) => {
+  if (value < start1) {
+    return start2;
+  }
+  if (value >= stop1) {
+    return stop2;
+  }
+  return ((value - start1) * (stop2 - start2)) / (stop1 - start1) + start2;
+};
+
 const sketch1 = (scene, camera, s1Bounds, setHue) => {
-  const start = new BABYLON.Vector3(0, 0, 0);
+  const start = new BABYLON.Vector3(0, 0, 1);
+  const end = new BABYLON.Vector3(0, 0, -3.5);
+  const totalDistance = BABYLON.Vector3.Distance(start, end);
   let hue = 0;
 
   const update = () => {
-    if (intersectWithPoint(s1Bounds, camera.position)) {
-      const distance = BABYLON.Vector3.Distance(start, camera.position);
-      hue = (distance * 50) % 360;
+    const localPoint = BABYLON.Vector3.TransformCoordinates(
+      camera.position,
+      s1Bounds.getWorldMatrix().clone().invert()
+    );
+    if (intersectWithPoint(s1Bounds, localPoint)) {
+      const distance = Math.abs(start.z - localPoint.z);
+      hue = rangeMap(distance, 0, totalDistance, 0, 359);
       setHue(true, hue);
     } else {
       setHue(false, hue);
@@ -243,15 +259,11 @@ const sketch1 = (scene, camera, s1Bounds, setHue) => {
 };
 
 const intersectWithPoint = (mesh, point) => {
-  const localPoint = BABYLON.Vector3.TransformCoordinates(
-    point,
-    mesh.getWorldMatrix().clone().invert()
-  );
   var boundInfo = mesh.getBoundingInfo();
   var max = boundInfo.maximum;
   var min = boundInfo.minimum;
-  if (localPoint.x > min.x && localPoint.x < max.x) {
-    if (localPoint.z > min.z && localPoint.z < max.z) {
+  if (point.x > min.x && point.x < max.x) {
+    if (point.z > min.z && point.z < max.z) {
       return true;
     }
   }
