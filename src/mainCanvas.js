@@ -168,25 +168,7 @@ const setupText = (scene) => {
   textTexture.drawText("ORIGIN", 75, 135, font, "black", "white", true, true);
 };
 
-const createScene = async () => {
-  const scene = new BABYLON.Scene(engine);
-  scene.collisionsEnabled = true;
-  scene.gravity = new BABYLON.Vector3(0, -0.9, 0);
-
-  scene.debugLayer.show();
-
-  const camera = setupCamera(scene);
-  setupLights();
-  setupEnvironment(scene);
-  const gltf = await setupGltf(scene);
-  const collisionMesh = gltf.meshes.find((e) => e.name === "CollisionMesh");
-  if (collisionMesh) {
-    collisionMesh.checkCollisions = true;
-    collisionMesh.visibility = 0;
-  }
-
-  setupText(scene);
-
+const setupPipeline = (scene, camera) => {
   const pipeline = new BABYLON.StandardRenderingPipeline(
     "Motion Blur",
     scene,
@@ -197,6 +179,27 @@ const createScene = async () => {
   pipeline.MotionBlurEnabled = true;
   pipeline.motionStrength = 3.2;
   pipeline.motionBlurSamples = 32;
+};
+
+const createScene = async () => {
+  const scene = new BABYLON.Scene(engine);
+  scene.collisionsEnabled = true;
+  scene.gravity = new BABYLON.Vector3(0, -0.9, 0);
+
+  scene.debugLayer.show();
+
+  const camera = setupCamera(scene);
+  setupPipeline(scene, camera);
+  setupLights();
+  setupEnvironment(scene);
+  const gltf = await setupGltf(scene);
+  const collisionMesh = gltf.meshes.find((e) => e.name === "CollisionMesh");
+  if (collisionMesh) {
+    collisionMesh.checkCollisions = true;
+    collisionMesh.visibility = 0;
+  }
+
+  setupText(scene);
 
   return scene;
 };
