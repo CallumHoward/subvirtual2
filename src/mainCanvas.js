@@ -126,10 +126,9 @@ const setupGltf = async (scene) => {
   );
 
   // Set up mirror material for the floor material only
-  // add mirror reflection to floor, index of floor material may
-  // change on new export
+  // add mirror reflection to floor
   const mirrorTex = new BABYLON.MirrorTexture(
-    "mirror",
+    "mirror texture",
     { ratio: 1 },
     scene,
     true
@@ -140,8 +139,11 @@ const setupGltf = async (scene) => {
     new BABYLON.Vector3(0, 0, 0),
     new BABYLON.Vector3(0, -1, 0)
   );
-  floorMaterial.reflectionTexture.renderList = container.meshes;
+  floorMaterial.reflectionTexture.renderList = container.meshes.filter(
+    (e) => e.id !== "Gallery_primitive6"
+  );
   floorMaterial.reflectionTexture.level = 5;
+  floorMaterial.reflectionTexture.adaptiveBlurKernel = 32;
 
   container.addAllToScene(scene);
   return container;
@@ -169,16 +171,32 @@ const setupText = (scene) => {
 };
 
 const setupPipeline = (scene, camera) => {
-  const pipeline = new BABYLON.StandardRenderingPipeline(
-    "Motion Blur",
+  const pipeline = new BABYLON.DefaultRenderingPipeline(
+    "Default pipeline",
+    false,
     scene,
-    1.0,
-    null,
     [camera]
   );
-  pipeline.MotionBlurEnabled = true;
-  pipeline.motionStrength = 3.2;
-  pipeline.motionBlurSamples = 32;
+  pipeline.imageProcessingEnabled = true;
+  pipeline.imageProcessing.vignetteEnabled = true;
+  pipeline.imageProcessing.vignetteWeight = 5;
+  pipeline.imageProcessing.contrast = 1.6;
+  pipeline.imageProcessing.exposure = 0.2;
+
+  // Motion blur - causes jaggies
+  // const motionblur = new BABYLON.MotionBlurPostProcess(
+  //   "motionblur",
+  //   scene,
+  //   1.0,
+  //   camera
+  // );
+  // motionblur.MotionBlurEnabled = true;
+  // motionblur.motionStrength = 3.2;
+  // motionblur.motionBlurSamples = 32;
+
+  // Glow
+  const gl = new BABYLON.GlowLayer("glow", scene, { mainTextureSamples: 1 });
+  gl.intensity = 0.2;
 };
 
 const createScene = async () => {
@@ -186,10 +204,9 @@ const createScene = async () => {
   scene.collisionsEnabled = true;
   scene.gravity = new BABYLON.Vector3(0, -0.9, 0);
 
-  scene.debugLayer.show();
+  // scene.debugLayer.show();
 
   const camera = setupCamera(scene);
-  setupPipeline(scene, camera);
   setupLights();
   setupEnvironment(scene);
   const gltf = await setupGltf(scene);
@@ -200,6 +217,7 @@ const createScene = async () => {
   }
 
   setupText(scene);
+  setupPipeline(scene, camera);
 
   return scene;
 };
