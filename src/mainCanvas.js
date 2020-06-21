@@ -151,9 +151,9 @@ const setupGltf = async (scene) => {
 };
 
 const setupText = (scene) => {
-  const plane = new BABYLON.Mesh.CreatePlane("Text Plane", 2, scene);
-  // plane.rotation.y = 3.14159;
-  plane.position.y += 1;
+  const plane = new BABYLON.Mesh.CreatePlane("Text Plane", 1, scene);
+  plane.rotation.y = 3.14159;
+  plane.position = new BABYLON.Vector3(-2.27, 1, -0.335);
 
   const textTexture = new BABYLON.DynamicTexture(
     "Dynamic Texture",
@@ -169,7 +169,16 @@ const setupText = (scene) => {
 
   // Add text to dynamic texture
   const font = "bold 44px helvetica";
-  textTexture.drawText("ORIGIN", 75, 135, font, "black", null, true, true);
+  textTexture.drawText(
+    "WHAT COLOUR IS YOUR WORLD?",
+    75,
+    135,
+    font,
+    "black",
+    null,
+    true,
+    true
+  );
 };
 
 const setupPipeline = (scene, camera) => {
@@ -237,6 +246,34 @@ const sketch1 = (scene, camera, s1Bounds, setHue) => {
   const totalDistance = BABYLON.Vector3.Distance(start, end);
   let hue = 0;
 
+  const textMesh = scene.meshes.find((e) => e.name === "S1Text");
+  if (textMesh) {
+    const textTexture = new BABYLON.DynamicTexture(
+      "Dynamic Texture",
+      { width: 512, height: 512 },
+      scene
+    );
+    textTexture.hasAlpha = true;
+    const textContext = textTexture.getContext();
+
+    const textMaterial = new BABYLON.StandardMaterial("Mat", scene);
+    textMaterial.diffuseTexture = textTexture;
+    textMesh.material = textMaterial;
+
+    // Add text to dynamic texture
+    const font = "bold 24px helvetica";
+    textTexture.drawText(
+      "WHAT COLOUR IS YOUR WORLD?",
+      55,
+      235,
+      font,
+      "black",
+      null,
+      true,
+      true
+    );
+  }
+
   const update = () => {
     const localPoint = BABYLON.Vector3.TransformCoordinates(
       camera.position,
@@ -291,7 +328,7 @@ const createScene = async () => {
     s1Bounds.visibility = 0;
   }
 
-  setupText(scene);
+  // setupText(scene);
   const pipeline = setupPipeline(scene, camera);
 
   const s1 = sketch1(scene, camera, s1Bounds, pipeline.setHue);
