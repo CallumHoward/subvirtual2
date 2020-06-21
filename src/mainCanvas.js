@@ -113,6 +113,7 @@ const setupLights = (scene) => {
     new BABYLON.Vector3(0, 1, -1),
     scene
   );
+  light1.intensity = 10;
 
   return [light1, light2];
 };
@@ -120,23 +121,26 @@ const setupLights = (scene) => {
 const setupGltf = async (scene) => {
   const container = await BABYLON.SceneLoader.LoadAssetContainerAsync(
     "./resources/",
-    "gallery.glb",
+    "gallery63.glb",
     scene
   );
 
   // set up mirror material for the floor material only
-  container.materials[8].reflectionTexture = new BABYLON.MirrorTexture(
+  // add mirror reflection to floor, index of floor material may
+  // change on new export
+  const mirrorTex = new BABYLON.MirrorTexture(
     "mirror",
-    { ratio: 0.5 },
+    { ratio: 1 },
     scene,
     true
   );
-  container.materials[8].reflectionTexture.mirrorPlane = new BABYLON.Plane.FromPositionAndNormal(
+  container.materials[7].reflectionTexture = mirrorTex;
+  container.materials[7].reflectionTexture.mirrorPlane = new BABYLON.Plane.FromPositionAndNormal(
     new BABYLON.Vector3(0, 0, 0),
     new BABYLON.Vector3(0, -1, 0)
   );
-  container.materials[8].reflectionTexture.renderList = container.meshes;
-  container.materials[8].reflectionTexture.level = 1;
+  container.materials[7].reflectionTexture.renderList = container.meshes;
+  container.materials[7].reflectionTexture.level = 10;
 
   container.addAllToScene(scene);
   return container;
