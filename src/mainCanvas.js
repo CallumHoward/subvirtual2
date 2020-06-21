@@ -121,7 +121,7 @@ const setupLights = (scene) => {
 const setupGltf = async (scene) => {
   const container = await BABYLON.SceneLoader.LoadAssetContainerAsync(
     "./resources/",
-    "gallery63.glb",
+    "gallery69.glb",
     scene
   );
 
@@ -133,14 +133,15 @@ const setupGltf = async (scene) => {
     scene,
     true
   );
-  const floorMaterial = container.materials.find((e) => e.id === "floor");
+  const floorMesh = container.meshes.find((e) => e.id === "floor");
+  const floorMaterial = floorMesh.material;
   floorMaterial.reflectionTexture = mirrorTex;
   floorMaterial.reflectionTexture.mirrorPlane = new BABYLON.Plane.FromPositionAndNormal(
     new BABYLON.Vector3(0, 0, 0),
     new BABYLON.Vector3(0, -1, 0)
   );
   floorMaterial.reflectionTexture.renderList = container.meshes.filter(
-    (e) => e.id !== "Gallery_primitive6"
+    (e) => e.id !== "floor"
   );
   floorMaterial.reflectionTexture.level = 5;
   floorMaterial.reflectionTexture.adaptiveBlurKernel = 32;
