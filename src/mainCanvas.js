@@ -125,7 +125,7 @@ const setupGltf = async (scene) => {
     scene
   );
 
-  // set up mirror material for the floor material only
+  // Set up mirror material for the floor material only
   // add mirror reflection to floor, index of floor material may
   // change on new export
   const mirrorTex = new BABYLON.MirrorTexture(
@@ -134,13 +134,14 @@ const setupGltf = async (scene) => {
     scene,
     true
   );
-  container.materials[7].reflectionTexture = mirrorTex;
-  container.materials[7].reflectionTexture.mirrorPlane = new BABYLON.Plane.FromPositionAndNormal(
+  const floorMaterial = container.materials.find((e) => e.id === "floor");
+  floorMaterial.reflectionTexture = mirrorTex;
+  floorMaterial.reflectionTexture.mirrorPlane = new BABYLON.Plane.FromPositionAndNormal(
     new BABYLON.Vector3(0, 0, 0),
     new BABYLON.Vector3(0, -1, 0)
   );
-  container.materials[7].reflectionTexture.renderList = container.meshes;
-  container.materials[7].reflectionTexture.level = 10;
+  floorMaterial.reflectionTexture.renderList = container.meshes;
+  floorMaterial.reflectionTexture.level = 5;
 
   container.addAllToScene(scene);
   return container;
