@@ -6,7 +6,7 @@
   "scripts": {
     "start": "parcel serve src/index.html --out-dir docs",
     "local": "parcel serve src/index.html --host 192.168.20.24 --https --out-dir docs",
-    "build": "parcel build src/index.html --out-dir docs",
+    "build": "parcel build src/index.html --out-dir docs --no-source-maps",
     "postbuild": "ncp ./static ./docs --filter '**/*.*'",
     "gh": "npm run build -- --public-url=./",
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -15,9 +15,6 @@
   "license": "ISC",
   "dependencies": {
     "@babel/runtime": "^7.9.6",
-    "@tensorflow-models/handpose": "0.0.3",
-    "@tensorflow/tfjs-converter": "^1.7.4",
-    "@tensorflow/tfjs-core": "^1.7.4",
     "babylonjs": "^4.1.0",
     "babylonjs-loaders": "^4.1.0",
     "regenerator-runtime": "^0.13.5"
