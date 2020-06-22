@@ -121,7 +121,7 @@ const setupLights = (scene) => {
 const setupGltf = async (scene) => {
   const container = await BABYLON.SceneLoader.LoadAssetContainerAsync(
     "./resources/",
-    "gallery69.glb",
+    "gallery.glb",
     scene
   );
 
