@@ -58,6 +58,8 @@ const setupCamera = (scene) => {
     scene
   );
   camera.minZ = 0.1;
+  camera.position.set(0.64, 1.25, 9.98);
+  camera.rotation.set(0, -3.13, 0);
   initPointerLock(engine.getRenderingCanvas(), camera);
 
   // This targets the camera to scene origin
@@ -255,6 +257,16 @@ const createScene = async () => {
   if (s1Bounds) {
     s1Bounds.visibility = 0;
   }
+
+  const s2Text = gltf.meshes.find((e) => e.id === "S2Text");
+  s2Text.material = new BABYLON.StandardMaterial("titleCard", scene);
+  s2Text.material.diffuseTexture = new BABYLON.Texture(
+    "./resources/titlecard.svg",
+    scene
+  );
+  s2Text.material.diffuseTexture.hasAlpha = true;
+  s2Text.material.diffuseTexture.uScale = 1.0;
+  s2Text.material.diffuseTexture.vScale = -1.0;
 
   // setupText(scene);
   const pipeline = setupPipeline(scene, camera);

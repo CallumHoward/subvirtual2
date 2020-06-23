@@ -53,8 +53,8 @@ export const sketch1 = (scene, camera, s1Bounds, setHue) => {
     arrowMesh.material = arrowMaterial;
 
     // Add arrow to dynamic texture
-    const font = "bold 480px helvetica";
-    arrowTexture.drawText("←", 55, 335, font, "black", null, true, true);
+    const font = "bold 280px helvetica";
+    arrowTexture.drawText("➔", 55, 335, font, "black", null, true, true);
   }
 
   const update = () => {
