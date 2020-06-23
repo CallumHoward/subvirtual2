@@ -2,6 +2,7 @@ import * as BABYLON from "babylonjs";
 import "babylonjs-loaders";
 
 import { sketch1 } from "./sketch1";
+import { sketch2 } from "./sketch2";
 
 const canvas = document.getElementById("renderCanvas"); // Get the canvas element
 const engine = new BABYLON.Engine(canvas, true); // Generate the BABYLON 3D engine
@@ -128,6 +129,11 @@ const setupGltf = async (scene) => {
     scene
   );
 
+  container.addAllToScene(scene);
+  return container;
+};
+
+const setupReflection = (scene, reflectiveMesh, meshes) => {
   // Set up mirror material for the floor material only
   // add mirror reflection to floor
   const mirrorTex = new BABYLON.MirrorTexture(
@@ -136,21 +142,17 @@ const setupGltf = async (scene) => {
     scene,
     true
   );
-  const floorMesh = container.meshes.find((e) => e.id === "floor");
-  const floorMaterial = floorMesh.material;
-  floorMaterial.reflectionTexture = mirrorTex;
-  floorMaterial.reflectionTexture.mirrorPlane = new BABYLON.Plane.FromPositionAndNormal(
+  const reflectiveMaterial = reflectiveMesh.material;
+  reflectiveMaterial.reflectionTexture = mirrorTex;
+  reflectiveMaterial.reflectionTexture.mirrorPlane = new BABYLON.Plane.FromPositionAndNormal(
     new BABYLON.Vector3(0, 0, 0),
     new BABYLON.Vector3(0, -1, 0)
   );
-  floorMaterial.reflectionTexture.renderList = container.meshes.filter(
+  reflectiveMaterial.reflectionTexture.renderList = meshes.filter(
     (e) => e.id !== "floor"
   );
-  floorMaterial.reflectionTexture.level = 5;
-  floorMaterial.reflectionTexture.adaptiveBlurKernel = 32;
-
-  container.addAllToScene(scene);
-  return container;
+  reflectiveMaterial.reflectionTexture.level = 5;
+  reflectiveMaterial.reflectionTexture.adaptiveBlurKernel = 32;
 };
 
 const setupText = (scene) => {
@@ -238,7 +240,7 @@ const createScene = async () => {
   scene.collisionsEnabled = true;
   scene.gravity = new BABYLON.Vector3(0, -0.9, 0);
 
-  // scene.debugLayer.show();
+  scene.debugLayer.show();
 
   const camera = setupCamera(scene);
   setupLights();
@@ -258,9 +260,23 @@ const createScene = async () => {
   const pipeline = setupPipeline(scene, camera);
 
   const s1 = sketch1(scene, camera, s1Bounds, pipeline.setHue);
+  const s2 = sketch2(scene, engine);
+  s2.anchor.position = new BABYLON.Vector3(1.2, 1, 4.1);
+  s2.anchor.scaling = new BABYLON.Vector3(0.67, 0.67, 0.67);
+
+  const floorMesh = gltf.meshes.find((e) => e.id === "floor");
+  const meshes = gltf.meshes.filter((e) => e.id !== "floor").concat(s2.meshes);
+  setupReflection(scene, floorMesh, meshes);
+
+  // const testBox = new BABYLON.MeshBuilder.CreateBox("testbox", {}, scene);
+  // testBox.material = new BABYLON.StandardMaterial("testmat", scene);
+
+  let time = 0;
 
   scene.registerBeforeRender(() => {
+    time += engine.getDeltaTime() / 1000;
     s1.update();
+    s2.update(time);
   });
 
   return scene;
