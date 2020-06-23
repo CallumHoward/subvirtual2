@@ -54,6 +54,7 @@ const setupCamera = (scene) => {
     new BABYLON.Vector3(0, 1.5, -3),
     scene
   );
+  camera.minZ = 0.1;
   initPointerLock(engine.getRenderingCanvas(), camera);
 
   // This targets the camera to scene origin
@@ -272,6 +273,26 @@ const sketch1 = (scene, camera, s1Bounds, setHue) => {
       true,
       true
     );
+  }
+
+  const arrowMesh = scene.meshes.find((e) => e.name === "S1Arrow");
+  if (arrowMesh) {
+    const arrowTexture = new BABYLON.DynamicTexture(
+      "Dynamic Texture",
+      { width: 512, height: 512 },
+      scene
+    );
+    arrowTexture.hasAlpha = true;
+    const arrowContext = arrowTexture.getContext();
+
+    const arrowMaterial = new BABYLON.StandardMaterial("Mat", scene);
+    arrowMaterial.diffuseTexture = arrowTexture;
+    arrowMaterial.disableLighting = true;
+    arrowMesh.material = arrowMaterial;
+
+    // Add arrow to dynamic texture
+    const font = "bold 480px helvetica";
+    arrowTexture.drawText("←", 55, 335, font, "black", null, true, true);
   }
 
   const update = () => {
