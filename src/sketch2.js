@@ -1,6 +1,7 @@
 import * as BABYLON from "babylonjs";
 import random from "canvas-sketch-util/random";
 import palettes from "nice-color-palettes";
+import { intersectWithPoint } from "./utils";
 
 const setupLights = (scene, meshes) => {
   const directionalLight = new BABYLON.DirectionalLight(
@@ -38,35 +39,39 @@ const setupLights = (scene, meshes) => {
   return [directionalLight, directionalLight2, hemiLight];
 };
 
-export const sketch2 = (scene, engine) => {
+export const sketch2 = (scene, engine, camera, s2Bounds, updateReflection) => {
   const anchor = new BABYLON.Mesh("anchor", scene);
   const box = new BABYLON.MeshBuilder.CreateBox("box", {}, scene);
-  const palette = random.pick(palettes);
   // console.log("LOG palette: ", palette);
   const meshes = [];
   const displacements = [];
 
+  let enteredBounds = false;
+
   const instanceCount = 20;
   const colorData = new Float32Array(4 * instanceCount);
 
-  for (let i = 0; i < instanceCount; i++) {
-    const color = BABYLON.Color3.FromHexString(random.pick(palette));
-    colorData[i * 4 + 0] = color.r;
-    colorData[i * 4 + 1] = color.g;
-    colorData[i * 4 + 2] = color.b;
-    colorData[i * 4 + 3] = 1.0;
-  }
+  const makeColorBuffer = (colorData, instanceCount, palette) => {
+    for (let i = 0; i < instanceCount; i++) {
+      const color = BABYLON.Color3.FromHexString(random.pick(palette));
+      colorData[i * 4 + 0] = color.r;
+      colorData[i * 4 + 1] = color.g;
+      colorData[i * 4 + 2] = color.b;
+      colorData[i * 4 + 3] = 1.0;
+    }
 
-  const colorBuffer = new BABYLON.VertexBuffer(
-    engine,
-    colorData,
-    BABYLON.VertexBuffer.ColorKind,
-    false,
-    false,
-    4,
-    true
-  );
-  box.setVerticesBuffer(colorBuffer);
+    const colorBuffer = new BABYLON.VertexBuffer(
+      engine,
+      colorData,
+      BABYLON.VertexBuffer.ColorKind,
+      false,
+      false,
+      4,
+      true
+    );
+
+    return colorBuffer;
+  };
 
   box.material = new BABYLON.StandardMaterial("box material", scene);
   // box.material.disableLighting = false;
@@ -97,17 +102,37 @@ export const sketch2 = (scene, engine) => {
     mesh.parent = anchor;
   };
 
-  // Setup a mesh with geometry + material
-  for (let i = 0; i < instanceCount - 1; i++) {
-    const mesh = box.createInstance("box" + i);
-    processMesh(mesh);
-  }
-  processMesh(box);
+  const init = () => {
+    box.setVerticesBuffer(
+      makeColorBuffer(colorData, instanceCount, random.pick(palettes))
+    );
+
+    while (meshes.length > 0) {
+      const mesh = meshes.pop();
+      if (mesh.id !== "box") {
+        mesh.dispose();
+      }
+    }
+    displacements.length = 0;
+
+    // Setup a mesh with geometry + material
+    for (let i = 0; i < instanceCount - 1; i++) {
+      const mesh = box.createInstance("box" + i);
+      processMesh(mesh);
+    }
+    processMesh(box);
+  };
+
+  init();
 
   const lights = setupLights(scene, meshes);
   lights.forEach((light) => {
     light.parent = anchor;
   });
+
+  const refresh = () => {
+    init();
+  };
 
   const zip = (arr1, arr2) => arr1.map((k, i) => [k, arr2[i]]);
   const enumerate = (arr) => arr.map((k, i) => [k, i]);
@@ -119,6 +144,26 @@ export const sketch2 = (scene, engine) => {
         mesh.position.y = Math.sin(displacement + time * speedFactor) * 0.75;
       }
     );
+
+    const localPoint = BABYLON.Vector3.TransformCoordinates(
+      camera.position,
+      s2Bounds.getWorldMatrix().clone().invert()
+    );
+
+    let rotation = camera.rotation.y % (2 * Math.PI);
+    if (rotation < 0) {
+      rotation += 2 * Math.PI;
+    }
+
+    if (intersectWithPoint(s2Bounds, localPoint)) {
+      if (!enteredBounds && rotation > 2 && rotation < 4) {
+        init();
+        updateReflection(meshes);
+        enteredBounds = true;
+      }
+    } else {
+      enteredBounds = false;
+    }
   };
 
   return {

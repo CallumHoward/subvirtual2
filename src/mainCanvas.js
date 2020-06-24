@@ -162,6 +162,14 @@ const setupReflection = (scene, reflectiveMesh, meshes) => {
   );
   reflectiveMaterial.reflectionTexture.level = 5;
   reflectiveMaterial.reflectionTexture.adaptiveBlurKernel = 32;
+
+  return {
+    updateMeshes: (meshes) => {
+      reflectiveMaterial.reflectionTexture.renderList = meshes.filter(
+        (e) => e.id !== "floor"
+      );
+    },
+  };
 };
 
 const setupText = (scene) => {
@@ -264,6 +272,10 @@ const createScene = async () => {
   if (s1Bounds) {
     s1Bounds.visibility = 0;
   }
+  const s2Bounds = gltf.meshes.find((e) => e.name === "S2Bounds");
+  if (s2Bounds) {
+    s2Bounds.visibility = 0;
+  }
 
   const s2Text = gltf.meshes.find((e) => e.id === "S2Text");
   s2Text.material = new BABYLON.StandardMaterial("titleCard", scene);
@@ -279,14 +291,21 @@ const createScene = async () => {
   // setupText(scene);
   const pipeline = setupPipeline(scene, camera);
 
+  const floorMesh = gltf.meshes.find((e) => e.id === "floor");
+  const reflection = setupReflection(scene, floorMesh, []);
+  const updateReflection = (refMeshes) => {
+    const filteredMeshes = gltf.meshes
+      .filter((e) => e.id !== "floor")
+      .concat(refMeshes);
+    reflection.updateMeshes(filteredMeshes);
+  };
+
   const s1 = sketch1(scene, camera, s1Bounds, pipeline.setHue);
-  const s2 = sketch2(scene, engine);
+  const s2 = sketch2(scene, engine, camera, s2Bounds, updateReflection);
   s2.anchor.position = new BABYLON.Vector3(1.2, 1, 4.1);
   s2.anchor.scaling = new BABYLON.Vector3(0.67, 0.67, 0.67);
 
-  const floorMesh = gltf.meshes.find((e) => e.id === "floor");
-  const meshes = gltf.meshes.filter((e) => e.id !== "floor").concat(s2.meshes);
-  setupReflection(scene, floorMesh, meshes);
+  updateReflection(s2.meshes);
 
   // const testBox = new BABYLON.MeshBuilder.CreateBox("testbox", {}, scene);
   // testBox.material = new BABYLON.StandardMaterial("testmat", scene);
