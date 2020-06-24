@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>My app</title>
+    <title>Origin (Vitual) - Subvirtual</title>
     <meta charset="UTF-8" />
     <meta name="HandheldFriendly" content="True" />
     <meta name="MobileOptimized" content="320" />
@@ -13,7 +13,34 @@
   </head>
 
   <body>
-    <canvas id="renderCanvas"></canvas>
+    <div id="subvirtual">
+      <div id="blocker" class="noselect">
+        <div id="landing-cta">
+          <span>
+            <img src="../static/resources/origin.svg" />
+            <h1>ORIGIN (VIRTUAL)</h1>
+            <h3>Click to begin</h3>
+          </span>
+        </div>
+      </div>
+      <canvas id="renderCanvas"></canvas>
+    </div>
+
+    <script>
+      (function () {
+        var script = document.createElement("script");
+        script.onload = function () {
+          var stats = new Stats();
+          document.body.appendChild(stats.dom);
+          requestAnimationFrame(function loop() {
+            stats.update();
+            requestAnimationFrame(loop);
+          });
+        };
+        script.src = "//mrdoob.github.io/stats.js/build/stats.min.js";
+        document.head.appendChild(script);
+      })();
+    </script>
     <script src="./app.js"></script>
   </body>
 </html>

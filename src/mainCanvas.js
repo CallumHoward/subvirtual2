@@ -31,11 +31,16 @@ const initPointerLock = (canvas, camera) => {
       document.webkitPointerLockElement === canvas ||
       document.msPointerLockElement === canvas ||
       document.pointerLockElement === canvas;
+
+    const blocker = document.getElementById("blocker");
+
     // If the user is already locked
     if (!controlEnabled) {
       camera.detachControl(canvas);
+      blocker.style.display = "flex";
     } else {
       camera.attachControl(canvas);
+      blocker.style.display = "none";
     }
   };
 
@@ -81,6 +86,8 @@ const setupCamera = (scene) => {
 
   // Set the ellipsoid around the camera (e.g. your player's size)
   camera.ellipsoid = new BABYLON.Vector3(0.6, 0.2, 0.9);
+
+  const blocker = document.getElementById("blocker");
 
   return camera;
 };
@@ -242,7 +249,7 @@ const createScene = async () => {
   scene.collisionsEnabled = true;
   scene.gravity = new BABYLON.Vector3(0, -0.9, 0);
 
-  scene.debugLayer.show();
+  // scene.debugLayer.show();
 
   const camera = setupCamera(scene);
   setupLights();
@@ -262,7 +269,8 @@ const createScene = async () => {
   s2Text.material = new BABYLON.StandardMaterial("titleCard", scene);
   s2Text.material.diffuseTexture = new BABYLON.Texture(
     "./resources/titlecard.svg",
-    scene
+    scene,
+    false
   );
   s2Text.material.diffuseTexture.hasAlpha = true;
   s2Text.material.diffuseTexture.uScale = 1.0;

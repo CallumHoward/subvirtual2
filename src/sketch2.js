@@ -34,7 +34,6 @@ const setupLights = (scene, meshes) => {
   hemiLight.ground = BABYLON.Color3.FromHexString("#000000");
   hemiLight.includedOnlyMeshes = meshes;
   hemiLight.intensity = 100;
-  console.log("LOG hemiLight: ", hemiLight);
 
   return [directionalLight, directionalLight2, hemiLight];
 };
@@ -43,7 +42,7 @@ export const sketch2 = (scene, engine) => {
   const anchor = new BABYLON.Mesh("anchor", scene);
   const box = new BABYLON.MeshBuilder.CreateBox("box", {}, scene);
   const palette = random.pick(palettes);
-  console.log("LOG palette: ", palette);
+  // console.log("LOG palette: ", palette);
   const meshes = [];
   const displacements = [];
 
