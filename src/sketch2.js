@@ -39,7 +39,14 @@ const setupLights = (scene, meshes) => {
   return [directionalLight, directionalLight2, hemiLight];
 };
 
-export const sketch2 = (scene, engine, camera, s2Bounds, updateReflection) => {
+export const sketch2 = (
+  scene,
+  engine,
+  camera,
+  s1Bounds,
+  s2Bounds,
+  updateReflection
+) => {
   const anchor = new BABYLON.Mesh("anchor", scene);
   const box = new BABYLON.MeshBuilder.CreateBox("box", {}, scene);
   // console.log("LOG palette: ", palette);
@@ -145,7 +152,12 @@ export const sketch2 = (scene, engine, camera, s2Bounds, updateReflection) => {
       }
     );
 
-    const localPoint = BABYLON.Vector3.TransformCoordinates(
+    const localPointS1 = BABYLON.Vector3.TransformCoordinates(
+      camera.position,
+      s1Bounds.getWorldMatrix().clone().invert()
+    );
+
+    const localPointS2 = BABYLON.Vector3.TransformCoordinates(
       camera.position,
       s2Bounds.getWorldMatrix().clone().invert()
     );
@@ -155,7 +167,10 @@ export const sketch2 = (scene, engine, camera, s2Bounds, updateReflection) => {
       rotation += 2 * Math.PI;
     }
 
-    if (intersectWithPoint(s2Bounds, localPoint)) {
+    if (
+      intersectWithPoint(s2Bounds, localPointS2) ||
+      intersectWithPoint(s1Bounds, localPointS1)
+    ) {
       if (!enteredBounds && rotation > 2 && rotation < 4) {
         init();
         updateReflection(meshes);

@@ -301,7 +301,14 @@ const createScene = async () => {
   };
 
   const s1 = sketch1(scene, camera, s1Bounds, pipeline.setHue);
-  const s2 = sketch2(scene, engine, camera, s2Bounds, updateReflection);
+  const s2 = sketch2(
+    scene,
+    engine,
+    camera,
+    s1Bounds,
+    s2Bounds,
+    updateReflection
+  );
   s2.anchor.position = new BABYLON.Vector3(1.2, 1, 4.1);
   s2.anchor.scaling = new BABYLON.Vector3(0.67, 0.67, 0.67);
 
