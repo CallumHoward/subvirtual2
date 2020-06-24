@@ -11,7 +11,8 @@ const initPointerLock = (canvas, camera) => {
   // On click event, request pointer lock
   canvas.addEventListener(
     "click",
-    () => {
+    (event) => {
+      blocker.display = "none";
       canvas.requestPointerLock =
         canvas.requestPointerLock ||
         canvas.msRequestPointerLock ||
@@ -24,6 +25,10 @@ const initPointerLock = (canvas, camera) => {
     false
   );
 
+  canvas.addEventListener("touchstart", () => {
+    blocker.style.display = "none";
+  });
+
   // Event listener when the pointerlock is updated (or removed by pressing ESC for example).
   const pointerlockchange = () => {
     const controlEnabled =
@@ -31,8 +36,6 @@ const initPointerLock = (canvas, camera) => {
       document.webkitPointerLockElement === canvas ||
       document.msPointerLockElement === canvas ||
       document.pointerLockElement === canvas;
-
-    const blocker = document.getElementById("blocker");
 
     // If the user is already locked
     if (!controlEnabled) {
